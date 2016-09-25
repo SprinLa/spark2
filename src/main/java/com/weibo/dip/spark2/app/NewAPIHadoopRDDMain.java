@@ -32,8 +32,13 @@ public class NewAPIHadoopRDDMain {
 
 		/*
 		 * /user/hdfs/rawlog/www_sinaedgeahsolci14ydn_trafficserver/
+		 * 
+		 * /user/hdfs/rawlog/www_sinaedgeahsolci14ydn_trafficserver/2016_09_23/
+		 * 00/www_sinaedgeahsolci14ydn_trafficserver-yf235028.scribe.dip.sina.
+		 * com.cn_16469-2016_09_23_00-20160923011_00000
 		 */
-		hadoopConf.set(FileInputFormat.INPUT_DIR, "/user/hdfs/rawlog/www_sinaedgeahsolci14ydn_trafficserver/");
+		hadoopConf.set(FileInputFormat.INPUT_DIR,
+				"/user/hdfs/rawlog/www_sinaedgeahsolci14ydn_trafficserver/2016_09_23/00/www_sinaedgeahsolci14ydn_trafficserver-yf235028.scribe.dip.sina.com.cn_16469-2016_09_23_00-20160923011_00000");
 		hadoopConf.set(FileInputFormat.INPUT_DIR_RECURSIVE, "true");
 
 		JavaPairRDD<LongWritable, Text> datas = sc.newAPIHadoopRDD(hadoopConf, TextInputFormat.class,
