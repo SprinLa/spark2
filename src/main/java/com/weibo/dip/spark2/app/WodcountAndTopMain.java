@@ -6,10 +6,10 @@ package com.weibo.dip.spark2.app;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -20,7 +20,9 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
 
@@ -82,67 +84,54 @@ public class WodcountAndTopMain {
 					}
 				}
 
+				/*
+				 * can't return null
+				 */
 				return tuples.iterator();
-			}
-
-		}).filter(new Function<Tuple2<String, Integer>, Boolean>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Boolean call(Tuple2<String, Integer> tuple) throws Exception {
-				return tuple != null && StringUtils.isNotEmpty(tuple._1());
 			}
 
 		});
 
-		// JavaPairRDD<String, Integer> wordcounts = pairs.reduceByKey(new
-		// Function2<Integer, Integer, Integer>() {
-		//
-		// private static final long serialVersionUID = 1L;
-		//
-		// @Override
-		// public Integer call(Integer x, Integer y) throws Exception {
-		// return x + y;
-		// }
-		//
-		// });
+		JavaPairRDD<String, Integer> wordcounts = pairs.reduceByKey(new Function2<Integer, Integer, Integer>() {
 
-		System.out.println(pairs.count());
+			private static final long serialVersionUID = 1L;
 
-		// List<Tuple2<String, Integer>> tops = wordcounts
-		// .mapToPair(new PairFunction<Tuple2<String, Integer>, Integer,
-		// String>() {
-		//
-		// private static final long serialVersionUID = 1L;
-		//
-		// @Override
-		// public Tuple2<Integer, String> call(Tuple2<String, Integer> tuple)
-		// throws Exception {
-		// return new Tuple2<Integer, String>(tuple._2(), tuple._1());
-		// }
-		//
-		// }).sortByKey().mapToPair(new PairFunction<Tuple2<Integer, String>,
-		// String, Integer>() {
-		//
-		// private static final long serialVersionUID = 1L;
-		//
-		// @Override
-		// public Tuple2<String, Integer> call(Tuple2<Integer, String> tuple)
-		// throws Exception {
-		// return new Tuple2<String, Integer>(tuple._2(), tuple._1());
-		// }
-		//
-		// }).take(10);
-		//
-		// tops.forEach(new Consumer<Tuple2<String, Integer>>() {
-		//
-		// @Override
-		// public void accept(Tuple2<String, Integer> tuple) {
-		// System.out.println(tuple._1() + "\t" + tuple._2());
-		// }
-		//
-		// });
+			@Override
+			public Integer call(Integer x, Integer y) throws Exception {
+				return x + y;
+			}
+
+		});
+
+		List<Tuple2<String, Integer>> tops = wordcounts
+				.mapToPair(new PairFunction<Tuple2<String, Integer>, Integer, String>() {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Tuple2<Integer, String> call(Tuple2<String, Integer> tuple) throws Exception {
+						return new Tuple2<Integer, String>(tuple._2(), tuple._1());
+					}
+
+				}).sortByKey(false).mapToPair(new PairFunction<Tuple2<Integer, String>, String, Integer>() {
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Tuple2<String, Integer> call(Tuple2<Integer, String> tuple) throws Exception {
+						return new Tuple2<String, Integer>(tuple._2(), tuple._1());
+					}
+
+				}).take(10);
+
+		tops.forEach(new Consumer<Tuple2<String, Integer>>() {
+
+			@Override
+			public void accept(Tuple2<String, Integer> tuple) {
+				System.out.println(tuple._1() + "\t" + tuple._2());
+			}
+
+		});
 
 		sc.close();
 	}
