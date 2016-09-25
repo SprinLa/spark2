@@ -6,7 +6,6 @@ package com.weibo.dip.spark2.app;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,19 +72,17 @@ public class WodcountAndTopMain {
 
 			@Override
 			public Iterator<Tuple2<String, Integer>> call(String line) throws Exception {
+				List<Tuple2<String, Integer>> tuples = new ArrayList<>();
+
 				Matcher matcher = pattern.matcher(line);
 
 				if (matcher.matches()) {
-					List<Tuple2<String, Integer>> tuples = new ArrayList<>(matcher.groupCount());
-
 					for (int index = 1; index <= matcher.groupCount(); index++) {
 						tuples.add(new Tuple2<String, Integer>(matcher.group(index), new Integer(1)));
 					}
-
-					return tuples.iterator();
 				}
 
-				return null;
+				return tuples.iterator();
 			}
 
 		}).filter(new Function<Tuple2<String, Integer>, Boolean>() {
