@@ -13,7 +13,7 @@ import org.apache.spark.api.java.function.Function2;
  * @author yurun
  *
  */
-public class HDFSBasicMain {
+public class TextFileMain {
 
 	public static void main(String[] args) {
 		SparkConf conf = new SparkConf();
